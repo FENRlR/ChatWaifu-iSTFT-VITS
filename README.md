@@ -7,7 +7,7 @@
 </p>
 
 # ChatWaifu with iSTFT-VITS integration
-
+original repostiory : https://github.com/cjyaddone/ChatWaifuL2D
 > ## How to run
 ### Create virtual environment (optional)
 ```
