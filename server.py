@@ -61,7 +61,6 @@ class vits():
         _ = utils.load_checkpoint(model, self.net_g_ms,None)
         
         
-    #- cleaned를 전제로
     def get_text(self, text):
         text_norm = text_to_sequence(text, self.hps_ms.data.text_cleaners)
         if self.hps_ms.data.add_blank:
