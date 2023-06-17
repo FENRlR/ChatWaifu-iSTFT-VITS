@@ -53,3 +53,5 @@ You can get api key [here](https://platform.openai.com/account/api-keys)
 ## Credits
 - [ChatWaifu] https://github.com/cjyaddone/ChatWaifuL2D
 - [MB-iSTFT-VITS] https://github.com/MasayaKawamura/MB-iSTFT-VITS
+- [ChatWaifu-API] https://github.com/ouor/ChatWaifu-API
+- [MB-iSTFT-VITS-multilingual] https://github.com/misakiudon/MB-iSTFT-VITS-multilingual
