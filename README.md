@@ -31,7 +31,7 @@ if error occurs, install visual studio and build tools and try again.
 Setting - Install library - Install Live2D Cubism
 ```
 
-### Place your vits model in ./userfile/tts/
+### Place your iSTFT-VITS model in ./userfile/tts/
 structure example:
 ```
 ──┬─userfile/tts/
