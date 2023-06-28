@@ -1,6 +1,8 @@
 # ChatWaifu with iSTFT-VITS integration
 Original repostiory : https://github.com/cjyaddone/ChatWaifuL2D
 
+(Actual) Original repostiory : https://github.com/ouor/ChatWaifu-API
+
 Currently supports Japanese models.
 > ## How to run
 ### Create virtual environment (optional)
