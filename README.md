@@ -1,13 +1,7 @@
-![cover](readme/cyberchat.png)
-
-<p align="center">
-	<img alt="GitHub" src="https://img.shields.io/github/license/cjyaddone/ChatWaifu?color=red">
-	<img src="https://img.shields.io/badge/Python-3.7|8|9|10-green" alt="PYTHON" >
-  	<a href="https://app.fossa.com/projects/git%2Bgithub.com%2Fcjyaddone%2FChatWaifu?ref=badge_small" alt="FOSSA Status"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcjyaddone%2FChatWaifu.svg?type=small"/></a>
-</p>
-
 # ChatWaifu with iSTFT-VITS integration
-original repostiory : https://github.com/cjyaddone/ChatWaifuL2D
+Original repostiory : https://github.com/cjyaddone/ChatWaifuL2D
+
+Currently supports Korean and Japanese models.
 > ## How to run
 ### Create virtual environment (optional)
 ```
