@@ -10,7 +10,6 @@ ko_pron==1.3
 matplotlib
 pydub
 openai
-navertts
 pyaudio
 scipy==1.9.3
 numpy==1.23.5
