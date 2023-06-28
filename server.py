@@ -13,7 +13,6 @@ import json
 import os
 import openai
 import socket
-from navertts import NaverTTS
 import datetime
 from text.symbols import symbols
 
@@ -59,8 +58,8 @@ class vits():
         _ = self.net_g_ms.eval()
         self.hps_ms = hps_ms
         _ = utils.load_checkpoint(model, self.net_g_ms,None)
-        
-        
+
+
     def get_text(self, text):
         text_norm = text_to_sequence(text, self.hps_ms.data.text_cleaners)
         if self.hps_ms.data.add_blank:
@@ -121,9 +120,10 @@ def download_file(url, save_dir):
     return local_filename
 
 class openai_session():
-    def __init__(self, api_key):
+    def __init__(self, api_key, tts_service):
         self.api_key = api_key
         openai.api_key = api_key
+        self.language = tts_service
         self.messages = []
         self.model = "gpt-3.5-turbo"
         self.currunt_log = f"userfile/log/{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.json"
@@ -136,13 +136,21 @@ class openai_session():
             f.write(data)
 
     def set_role(self, role):
-        prefix = "이제부터 당신은 다음과 같은 역할을 맡아 대화를 진행합니다: \n"
+        prefix = ""
+        if self.language == 0:
+            prefix = "From now on, you will assume the following roles to conduct the conversation: \n"
+        elif self.language == 1:
+            prefix = "이제부터 당신은 다음과 같은 역할을 맡아 대화를 진행합니다: \n"
+        elif self.language == 2:
+            prefix = "これからあなたは次の役割を果たして会話を続けます。: \n"
+
         self.messages.append({"role": "system", "content": prefix + role})
 
     def set_greeting(self, greeting):
         self.messages.append({"role": "assistant", "content": greeting})
     
     def send_message(self, message):
+        answer = ""
         try:
             self.messages.append({"role": "user", "content": message})
             res = openai.ChatCompletion.create(
@@ -153,97 +161,98 @@ class openai_session():
             self.messages.append({"role": "assistant", "content": answer})
             self.save()
         except Exception as e:
-            answer = "앗.. 뭐라고 하셨었죠? 다시 한번 말씀해 주실 수 있나요?"
-            print("에러 발생: " + str(e))
+            if self.language == 0:
+                answer = "Excuse me, could you repeat what you just said?"
+            elif self.language == 1:
+                answer = "앗.. 뭐라고 하셨었죠? 다시 한번 말씀해 주실 수 있나요?"
+            elif self.language == 2:
+                answer = "あっ、何て言ってましたっけ？ もう一度おっしゃっていただけますか？"
+
+            print("ERROR Occurred: " + str(e))
 
         return answer
     
-class navertts():
-    def generateSound(self, inputString, id):
-        output_path = "./output.mp3"
-        tts = NaverTTS(inputString, lang='ko')
-        tts.save(output_path)
-        print('Successfully saved!')
-        return output_path
+
 
 def main():
-
+    #"""
     server = SocketServer("127.0.0.1", 9000)
-    print("렌파이 클라이언트와 연결 대기중...")
+    print("Waiting connection from client...")
     server.start()
 
-    print("렌파이 클라이언트와 연결되었습니다.")
+    print("Connected.")
 
-    tts_service = int(server.receive()) # 0: 로컬 vits, 1: 네이버
+    tts_service = int(server.receive()) # language selection
+    lang = ["eng", "kor", "jp"]
 
-    if tts_service == 0:
-        korean_model_path = r"userfile\tts\model.pth"
-        korean_config_path = r"userfile\tts\config.json"
+    model_path = f"./userfile/tts/{lang[tts_service]}/model.pth"
+    config_path = f"./userfile/tts/{lang[tts_service]}/config.json"
 
-        if not os.path.isfile(korean_model_path):
-            os.makedirs(get_dir(korean_model_path), exist_ok=True)
-            print("ERROR : TTS 모델 체크포인트 파일이 없습니다.")
+    if not os.path.isfile(model_path):
+        os.makedirs(get_dir(model_path), exist_ok=True)
+        print("ERROR : model.pth not found.")
 
-        if not os.path.isfile(korean_config_path):
-            os.makedirs(get_dir(korean_config_path), exist_ok=True)
-            print("ERROR : TTS 모델 설정 파일이 없습니다.")
-        
-        tts = vits(korean_model_path, korean_config_path)
-        config = json.load(open(korean_config_path, 'r'))
-        #spk_list = config['speakers']
-        speaker = int(server.receive()) # will be removed soon
-        print("선택된 음성: " + speaker)
-    
-    elif tts_service == 1:
-        tts = navertts()
-        speaker = 0
+    if not os.path.isfile(config_path):
+        os.makedirs(get_dir(config_path), exist_ok=True)
+        print("ERROR : config.json not found.")
 
-    print("렌파이에서 API KEY를 입력해주세요.")
-    print("API KEY는 https://platform.openai.com/account/api-keys 에서 발급할 수 있습니다.")
+    tts = vits(model_path, config_path)
+    config = json.load(open(config_path, 'r'))
+
+
+    print("Input API KEY to the client")
+    print("You can get API KEY from : https://platform.openai.com/account/api-keys")
 
     session_token = server.receive()
 
     if(session_token):
         print(f"API KEY: ...{session_token[-8:]}")
-        oai = openai_session(session_token)
+        oai = openai_session(session_token, tts_service)
 
         setting = server.receive()
         oai.set_role(setting)
-        print("배경 설정: "+ setting)
+        print("Background concept: "+ setting)
 
         greeting = server.receive()
         oai.set_greeting(greeting)
-        print("인사말: "+ greeting)
-    
+        print("Greeting: "+ greeting)
 
-    while True:
-        question = server.receive()
-        print("Question Received: " + question)
+        while True:
+            question = server.receive()
+            print("Question Received: " + question)
 
-        answer = oai.send_message(question)
-        print("ChatGPT:", answer)
+            answer = oai.send_message(question)
+            print("ChatGPT:", answer)
 
-        tts_audio_path = tts.generateSound(answer)
+            tts_audio_path = tts.generateSound(answer)
 
-        # convert wav to ogg
-        src = tts_audio_path
-        dst = "./ChatWithGPT/game/audio/test.ogg"
-        sound = getattr(AudioSegment, f'from_{src.split(".")[-1]}')(src)
-        sound.export(dst, format="ogg")
+            # convert wav to ogg
+            src = tts_audio_path
+            dst = "./ChatWithGPT/game/audio/test.ogg"
+            sound = getattr(AudioSegment, f'from_{src.split(".")[-1]}')(src)
+            sound.export(dst, format="ogg")
 
-        # send response to UI
-        server.send(answer)
+            # send response to UI
+            server.send(answer)
 
-        # finish playing audio
-        print(server.receive())
+            # finish playing audio
+            print(server.receive())
+
+
+
+    #"""
+
+
+
+
 
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("종료합니다.")
+        print("Exiting...")
         sys.exit(0)
     except ConnectionResetError:
-        print("클라이언트와의 연결이 끊겼습니다.")
+        print("Connection lost.")
         sys.exit(0)
