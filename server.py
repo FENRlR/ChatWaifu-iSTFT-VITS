@@ -190,9 +190,9 @@ def main():
         
         tts = vits(korean_model_path, korean_config_path)
         config = json.load(open(korean_config_path, 'r'))
-        spk_list = config['speakers']
-        speaker = int(server.receive())
-        print("선택된 음성: " + spk_list[speaker])
+        #spk_list = config['speakers']
+        speaker = int(server.receive()) # will be removed soon
+        print("선택된 음성: " + speaker)
     
     elif tts_service == 1:
         tts = navertts()
@@ -223,7 +223,7 @@ def main():
         answer = oai.send_message(question)
         print("ChatGPT:", answer)
 
-        tts_audio_path = tts.generateSound(answer, speaker)
+        tts_audio_path = tts.generateSound(answer)
 
         # convert wav to ogg
         src = tts_audio_path
