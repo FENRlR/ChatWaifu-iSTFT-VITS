@@ -1,0 +1,1 @@
+place your model.pth & config.json here
