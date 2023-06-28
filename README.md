@@ -30,13 +30,13 @@ Setting - Install library - Install Live2D Cubism
 ```
 
 ### Place your iSTFT-VITS model in ./userfile/tts/
-structure example(Korean model):
+structure example (Korean model):
 ```
 ──┬─userfile/tts/kor
   ├── config.json
   └── model.pth
 ```
-structure example(Japanese model):
+structure example (Japanese model):
 ```
 ──┬─userfile/tts/jp
   ├── config.json
