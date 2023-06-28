@@ -17,7 +17,7 @@ from unidecode import unidecode
 from phonemizer import phonemize
 import pyopenjtalk
 from text.japanese import japanese_to_romaji_with_accent, japanese_to_ipa, japanese_to_ipa2, japanese_to_ipa3
-#from text.korean import latin_to_hangul, number_to_hangul, divide_hangul, korean_to_lazy_ipa, korean_to_ipa
+from text.korean import latin_to_hangul, number_to_hangul, divide_hangul, korean_to_lazy_ipa, korean_to_ipa
 
 # Regular expression matching whitespace:
 _whitespace_re = re.compile(r'\s+')
@@ -117,7 +117,7 @@ def japanese_cleaners(text):
 def japanese_cleaners2(text):
     return japanese_cleaners(text).replace('ts', 'ʦ').replace('...', '…')
 
-"""
+
 def korean_cleaners(text):
     '''Pipeline for Korean text'''
     text = latin_to_hangul(text)
@@ -125,7 +125,7 @@ def korean_cleaners(text):
     text = divide_hangul(text)
     text = re.sub(r'([\u3131-\u3163])$', r'\1.', text)
     return text
-"""
+
 
 def japanese_triphone_cleaners(text):
   sentences = re.split(_japanese_marks, text)
