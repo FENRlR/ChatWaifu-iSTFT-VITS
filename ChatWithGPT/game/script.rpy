@@ -2,8 +2,8 @@
 
 # Declare the characters used by this game. The color parameter colors the character name.
 
-define e = Character("챗봇")
-define y = Character("사용자")
+define e = Character("Chatbot")
+define y = Character("User")
 define config.gl2 = True
 
 image hiyori = Live2D("Resources/Hiyori", base=.6, loop = True, fade=True)
@@ -30,47 +30,22 @@ label start:
 label chooseTts:
     $ renpy.block_rollback()
     menu TTSChoice:
-        e"TTS 서비스를 선택해주세요"
-        "로컬 VITS":
-            python:
-                client.send(("0").encode())
-            jump modelChoice
-        "네이버 TTS":
+        e"Select language"
+        "Korean":
             python:
                 client.send(("1").encode())
             jump getApiKey
-
-label modelChoice:
-    $ renpy.block_rollback()
-    menu KRmodelChoice:
-        e "음성 출력할 캐릭터를 선택해주세요"
-        "index 0":
-            python:
-                client.send(("0").encode())
-        "index 1":
-            python:
-                client.send(("1").encode())
-        "index 2":
+        "Japanese":
             python:
                 client.send(("2").encode())
-        "index 3":
-            python:
-                client.send(("3").encode())
-        "index 4":
-            python:
-                client.send(("4").encode())
-        "index 5":
-            python:
-                client.send(("5").encode())
-
-    jump getApiKey
+            jump getApiKey
 
 
 label getApiKey:
     $ renpy.block_rollback()
 
     python:
-        token = renpy.input("open AI API KEY를 입력해주세요")
+        token = renpy.input("Enter openAI API KEY")
         client.send(token.encode())
     
     jump uploadSetting
@@ -80,14 +55,14 @@ label getApiKey:
 label uploadSetting:
     $ renpy.block_rollback()
     python:
-        token = renpy.input("원하는 배경 설정을 입력해주세요")
+        token = renpy.input("Enter background explanation of the character")
         client.send(token.encode())
     jump uploadInit
 
 label uploadInit:
     $ renpy.block_rollback()
     python:
-        token = renpy.input("해당 캐릭터의 첫 대사를 입력해주세요")
+        token = renpy.input("Enter the first line of the character(greeting)")
         client.send(token.encode())
     jump talk_keyboard
 
@@ -96,7 +71,7 @@ label talk_keyboard:
     $ renpy.block_rollback()
     show hiyori m02
     python:
-        message = renpy.input("나：")
+        message = renpy.input("User：")
         client.send(message.encode())
         data = bytes()
     jump checkRes
@@ -138,5 +113,5 @@ label answer:
     e "[response]"
     voice sustain
     
-    $ client.send("음성 재생 완료".encode())
+    $ client.send("Playback complete".encode())
     jump talk_keyboard
