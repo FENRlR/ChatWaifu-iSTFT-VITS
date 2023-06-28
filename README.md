@@ -5,7 +5,7 @@ Original repostiory : https://github.com/cjyaddone/ChatWaifuL2D
 
 (Actual) Original repostiory : https://github.com/ouor/ChatWaifu-API
 
-Supports Japanese models.
+Supports Korean and Japanese models.
 > ## How to run
 ### Create virtual environment (optional)
 ```
@@ -30,9 +30,15 @@ Setting - Install library - Install Live2D Cubism
 ```
 
 ### Place your iSTFT-VITS model in ./userfile/tts/
-structure example:
+structure example(Korean model):
 ```
-──┬─userfile/tts/
+──┬─userfile/tts/kor
+  ├── config.json
+  └── model.pth
+```
+structure example(Japanese model):
+```
+──┬─userfile/tts/jp
   ├── config.json
   └── model.pth
 ```
