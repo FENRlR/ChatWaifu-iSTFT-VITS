@@ -1,5 +1,5 @@
 # ChatWaifu with iSTFT-VITS integration
-This repository was nightly built for a single need. Currently working on fixes.
+This repository was improvised for a single need. Currently working on fixes.
 
 Original repostiory : https://github.com/cjyaddone/ChatWaifuL2D
 
