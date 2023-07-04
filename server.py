@@ -268,7 +268,7 @@ def main():
                     st = time.time()
                     data = stream.read(1024)
                     et = time.time()
-                    print(stopper(np.frombuffer(b''.join(frames), dtype=np.int16)))
+                    #print(stopper(np.frombuffer(b''.join(frames), dtype=np.int16))) # monitoring for threshold definition
                     frames.append(data)
 
                     if elt >= maxdur:
@@ -279,7 +279,7 @@ def main():
                         elt = 0
 
 
-                print("Voice input sequence end.")
+                print("Voice input sequence end")
                 stream.stop_stream()
                 stream.close()
                 p.terminate()
