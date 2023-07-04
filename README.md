@@ -5,6 +5,8 @@ Original repostiory : https://github.com/cjyaddone/ChatWaifuL2D
 
 (Actual) Original repostiory : https://github.com/ouor/ChatWaifu-API
 
+The iSTFT-VITS inference part is based on https://github.com/misakiudon/MB-iSTFT-VITS-multilingual
+
 Supports Korean and Japanese models.
 > ## How to run
 ### Create virtual environment (optional)
