@@ -175,7 +175,6 @@ class openai_session():
 
 
 def main():
-    #"""
     server = SocketServer("127.0.0.1", 9000)
     print("Waiting connection from client...")
     server.start()
