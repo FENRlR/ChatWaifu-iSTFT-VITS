@@ -13,3 +13,4 @@ openai
 pyaudio
 scipy==1.9.3
 numpy==1.23.5
+openai-whisper

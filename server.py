@@ -15,7 +15,10 @@ import openai
 import socket
 import datetime
 from text.symbols import symbols
-
+import time
+import pyaudio
+import whisper
+import numpy as np
 
 class SocketServer:
     def __init__(self, host, port):
@@ -105,9 +108,6 @@ class vits():
         return out_path
 
 
-
-
-
 get_dir = lambda x: os.path.split(os.path.realpath(x))[0]
 
 def download_file(url, save_dir):
@@ -137,7 +137,7 @@ class openai_session():
 
     def set_role(self, role):
         prefix = ""
-        if self.language == 0:
+        if self.language == 0: # en support for later
             prefix = "From now on, you will assume the following roles to conduct the conversation: \n"
         elif self.language == 1:
             prefix = "이제부터 당신은 다음과 같은 역할을 맡아 대화를 진행합니다: \n"
@@ -184,6 +184,7 @@ def main():
 
     tts_service = int(server.receive()) # language selection
     lang = ["eng", "kor", "jp"]
+    print(f"Selected language : {lang[tts_service]}")
 
     model_path = f"./userfile/tts/{lang[tts_service]}/model.pth"
     config_path = f"./userfile/tts/{lang[tts_service]}/config.json"
@@ -197,53 +198,141 @@ def main():
         print("ERROR : config.json not found.")
 
     tts = vits(model_path, config_path)
-    config = json.load(open(config_path, 'r'))
 
+    config = json.load(open(config_path, 'r')) # for multi speaker detection later
+    """
+    try:
+        spk_list = config['speakers']
+        speaker = int(server.receive())
+        print("Selected speaker : " + spk_list[speaker])
+    except:
+        print("Proceed without speaker selection")
+    """
 
-    print("Input API KEY to the client")
-    print("You can get API KEY from : https://platform.openai.com/account/api-keys")
-
+    print("Input API KEY to the client\nYou can get API KEY from : https://platform.openai.com/account/api-keys")
     session_token = server.receive()
 
     if(session_token):
         print(f"API KEY: ...{session_token[-8:]}")
         oai = openai_session(session_token, tts_service)
 
-        setting = server.receive()
-        oai.set_role(setting)
-        print("Background concept: "+ setting)
+        vrc = server.receive()
+        print(f"Voice recognition status : {vrc}")
 
-        greeting = server.receive()
-        oai.set_greeting(greeting)
-        print("Greeting: "+ greeting)
+        if vrc == "0":
+            #- keyboard
+            setting = server.receive()
+            oai.set_role(setting)
+            print(f"Background concept : {setting}")
 
-        while True:
-            question = server.receive()
-            print("Question Received: " + question)
+            greeting = server.receive()
+            oai.set_greeting(greeting)
+            print(f"Greeting: {greeting}")
 
-            answer = oai.send_message(question)
-            print("ChatGPT:", answer)
+            while True:
+                question = server.receive()
+                print("Question Received : " + question)
 
-            tts_audio_path = tts.generateSound(answer)
+                answer = oai.send_message(question)
+                print("ChatGPT :", answer)
 
-            # convert wav to ogg
-            src = tts_audio_path
-            dst = "./ChatWithGPT/game/audio/test.ogg"
-            sound = getattr(AudioSegment, f'from_{src.split(".")[-1]}')(src)
-            sound.export(dst, format="ogg")
+                tts_audio_path = tts.generateSound(answer)
 
-            # send response to UI
-            server.send(answer)
+                # convert wav to ogg
+                src = tts_audio_path
+                dst = "./ChatWithGPT/game/audio/test.ogg"
+                sound = getattr(AudioSegment, f'from_{src.split(".")[-1]}')(src)
+                #sound.export(dst, format="ogg")
+                sound.export(dst, format="ogg", codec="libopus", bitrate="256000") # still sounds horrible
 
-            # finish playing audio
-            print(server.receive())
+                server.send(answer)# send response to UI
+                print(server.receive())# finish playing audio
+
+        elif vrc == "1":
+            #- voice recognition
+            sampling = 16000
+            maxdur = 3  # to determine the end of speech - if the sqavg of input is lower than the <threshold> consecutively for <maxdur> seconds
+            threshold = 1000 # threshold to define empty input
+
+            # stopper
+            def stopper(indata):
+                return np.sum(np.square(indata)) / len(indata) # sqavg
+
+            def micinput():
+                print("Beginning voice input sequence")
+                frames = []
+                p = pyaudio.PyAudio()
+                stream = p.open(format=pyaudio.paInt16, channels=1,rate=sampling, input=True, frames_per_buffer=1024)
+                elt = 0
+
+                while True:
+                    st = time.time()
+                    data = stream.read(1024)
+                    et = time.time()
+                    print(stopper(np.frombuffer(b''.join(frames), dtype=np.int16)))
+                    frames.append(data)
+
+                    if elt >= maxdur:
+                        break
+                    elif stopper(np.frombuffer(b''.join(frames), dtype=np.int16)) < threshold:
+                        elt += et - st
+                    else:
+                        elt = 0
 
 
+                print("Voice input sequence end.")
+                stream.stop_stream()
+                stream.close()
+                p.terminate()
 
-    #"""
+                model = whisper.load_model("small")
+                audio = np.frombuffer(b''.join(frames), dtype=np.int16)
+                audio = audio.astype(np.float32) / 2**15
+                audio = whisper.pad_or_trim(audio) # pad/trim it to fit 30 seconds
+                mel = whisper.log_mel_spectrogram(audio).to(model.device)
 
+                # spoken language detection
+                _, probs = model.detect_language(mel)
+                print(f"Detected language : {max(probs, key=probs.get)}") # the outputs are en, ja, ko
 
+                options = whisper.DecodingOptions()#decode
+                result = whisper.decode(model, mel, options)
 
+                # print the recognized text
+                print(result.text)
+                return result.text
+
+            # voice recognition
+            setting = micinput()
+            server.send(setting)
+            oai.set_role(setting)
+            print(f"Background concept : {setting}")
+
+            greeting = micinput()
+            server.send(greeting)
+            oai.set_greeting(greeting)
+            print(f"Greeting : {greeting}")
+
+            while True:
+                question = micinput()
+                server.send(question)
+                print("Question Received : " + question)
+
+                answer = oai.send_message(question)
+                print("ChatGPT :", answer)
+
+                tts_audio_path = tts.generateSound(answer)
+
+                # convert wav to ogg
+                src = tts_audio_path
+                dst = "./ChatWithGPT/game/audio/test.ogg"
+                sound = getattr(AudioSegment, f'from_{src.split(".")[-1]}')(src)
+
+                # sound.export(dst, format="ogg")
+                sound.export(dst, format="ogg", codec="libopus", bitrate="256000")
+
+                server.send(answer)
+                print(server.receive())
 
 
 
