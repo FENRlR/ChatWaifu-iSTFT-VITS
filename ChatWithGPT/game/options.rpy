@@ -125,6 +125,8 @@ default preferences.text_cps = 0
 
 default preferences.afm_time = 15
 
+## autoplay by default
+default preferences.afm_after_click = False
 
 ## 세이브 디렉토리 ####################################################################
 ##
