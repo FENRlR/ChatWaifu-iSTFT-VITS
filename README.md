@@ -1,5 +1,5 @@
 # ChatWaifu with iSTFT-VITS replacement
-This repository was improvised for a single need. Currently working on fixes.
+This repository was improvised for a single need - operating iSTFT-VITS model on ChatWaifu.
 
 Original repostiory : https://github.com/cjyaddone/ChatWaifuL2D
 
@@ -7,7 +7,7 @@ Original repostiory : https://github.com/cjyaddone/ChatWaifuL2D
 
 The iSTFT-VITS inference part is based on https://github.com/misakiudon/MB-iSTFT-VITS-multilingual
 
-Supports Korean and Japanese models.
+Supports Korean and Japanese iSTFT-VITS models.
 > ## How to run
 ### Create virtual environment (optional)
 ```
