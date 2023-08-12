@@ -1,4 +1,4 @@
-# ChatWaifu with iSTFT-VITS replacement
+# ChatWaifu with iSTFT-VITS
 This repository was improvised for a single need - operating iSTFT-VITS model on ChatWaifu.
 
 Original repostiory : https://github.com/cjyaddone/ChatWaifuL2D
