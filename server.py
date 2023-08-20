@@ -260,6 +260,7 @@ def main():
             def micinput():
                 print("Beginning voice input sequence")
                 frames = []
+                subf = []
                 p = pyaudio.PyAudio()
                 stream = p.open(format=pyaudio.paInt16, channels=1,rate=sampling, input=True, frames_per_buffer=1024)
                 elt = 0
@@ -270,13 +271,16 @@ def main():
                     et = time.time()
                     #print(stopper(np.frombuffer(b''.join(frames), dtype=np.int16))) # monitoring for threshold definition
                     frames.append(data)
+                    subf.append(data)
 
                     if elt >= maxdur:
                         break
-                    elif stopper(np.frombuffer(b''.join(frames), dtype=np.int16)) < threshold:
+                    elif stopper(np.frombuffer(b''.join(subf), dtype=np.int16)) < threshold:
                         elt += et - st
                     else:
                         elt = 0
+                        
+                    subf = []
 
 
                 print("Voice input sequence end")
