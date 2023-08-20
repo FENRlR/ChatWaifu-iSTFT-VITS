@@ -251,7 +251,7 @@ def main():
             #- voice recognition
             sampling = 16000
             maxdur = 3  # to determine the end of speech - if the sqavg of input is lower than the <threshold> consecutively for <maxdur> seconds
-            threshold = 1000 # threshold to define empty input
+            threshold = 500 # threshold to define empty input
 
             # stopper
             def stopper(indata):
